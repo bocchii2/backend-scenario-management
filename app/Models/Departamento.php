@@ -10,7 +10,7 @@ class Departamento extends Model
     use Auditable;
     //
     protected $table = "departamentos";
-    protected $fillable = ['nombre_departamento', 'nomenclatura', 'departamento_padre_id', 'activo', 'created_by', 'updated_by'];
+    protected $fillable = ['nombre_departamento','departamento_categoria_id', 'nomenclatura', 'departamento_padre_id', 'activo', 'created_by', 'updated_by'];
 
     public function usuarios()
     {

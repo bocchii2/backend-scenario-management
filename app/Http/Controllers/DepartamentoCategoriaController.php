@@ -87,6 +87,6 @@ class DepartamentoCategoriaController extends Controller
         $categoria = DepartamentoCategoria::findOrFail($departamentoCategoriaId);
         $categoria->delete();
 
-        return response()->json(['message' => 'Categoria deleted successfully'], 200);
+        return response()->json(['message' => 'Categoria deleted successfully', 'data' => $categoria], 200);
     }
 }

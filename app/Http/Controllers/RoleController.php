@@ -34,9 +34,15 @@ class RoleController extends Controller
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string|max:255',
             'slug' => 'required|string|max:255|unique:roles,slug',
+            'permissions' => 'sometimes|array',
+            'permissions.*' => 'exists:permissions,id',
         ]);
 
         $role = Role::create($request->only('nombre', 'descripcion', 'slug'));
+
+        if ($request->filled('permissions')) {
+            $role->permissions()->attach($request->permissions);
+        }
 
         return response()->json(["message" => "Rol creado exitosamente.", "data" => $role], 201);
     }

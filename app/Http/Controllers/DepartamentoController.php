@@ -35,6 +35,7 @@ class DepartamentoController extends Controller
             'nombre_departamento' => 'required|string|max:255',
             'nomenclatura' => 'required|string|max:50',
             'departamento_padre_id' => 'nullable|exists:departamentos,id',
+            'departamento_categoria_id' => 'required|exists:departamento_categorias,id',
             'activo' => 'required|boolean',
         ]);
 

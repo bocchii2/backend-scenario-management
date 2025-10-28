@@ -25,6 +25,10 @@ class PermisosSeeder extends Seeder
 
         $acciones = ['crear', 'ver', 'editar', 'eliminar'];
 
+        // truncate the permissions table
+        \App\Models\Permission::truncate();
+
+        // Crear permisos
         foreach ($entidades as $id_entidad) {
             foreach ($acciones as $accion) {
                 \App\Models\Permission::create([

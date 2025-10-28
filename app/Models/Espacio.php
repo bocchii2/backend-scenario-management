@@ -93,4 +93,10 @@ class Espacio extends Model
     {
         return $this->capacidad ? (string) $this->capacidad : 'No especificada';
     }
+
+
+    public function serviciosInternos()
+    {
+        return $this->belongsToMany(ServicioInterno::class, 'servicio_interno_espacios', 'espacio_id', 'servicio_interno_id');
+    }
 }

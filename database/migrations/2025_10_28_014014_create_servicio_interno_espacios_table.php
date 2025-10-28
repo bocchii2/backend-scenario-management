@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departamentos', function (Blueprint $table) {
+        Schema::create('servicio_interno_espacios', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre_departamento');
-            $table->string('nomenclatura');
-            $table->foreignId('departamento_padre_id')->nullable()->constrained('departamentos')->onDelete('SET NULL');
-            $table->boolean('activo')->default(true); 
+            $table->foreignId('servicio_interno_id')->constrained('servicio_internos')->onDelete('cascade');
+            $table->foreignId('espacio_id')->constrained('espacios')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('departamentos');
+        Schema::dropIfExists('servicio_interno_espacios');
     }
 };

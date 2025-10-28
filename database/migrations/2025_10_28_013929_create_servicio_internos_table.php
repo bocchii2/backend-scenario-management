@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departamentos', function (Blueprint $table) {
+        Schema::create('servicio_internos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre_departamento');
-            $table->string('nomenclatura');
-            $table->foreignId('departamento_padre_id')->nullable()->constrained('departamentos')->onDelete('SET NULL');
-            $table->boolean('activo')->default(true); 
+            $table->string('nombre_servicio');
+            $table->string('codigo_servicio');
+            $table->boolean('activo')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('departamentos');
+        Schema::dropIfExists('servicio_internos');
     }
 };
