@@ -18,7 +18,7 @@ class AdminUserSeeder extends Seeder
             'nombres_completos' => 'Admin User',
             'correo_electronico' => 'admin@example.com',
             'cargo_id' => 1, // Asumiendo que el cargo con ID 1 es 'Administrador de Sistemas'
-            'departamento_id' => 10, // Asumiendo que el departamento con ID 1 es 'Sistemas'
+            'departamento_id' => 2, // Asumiendo que el departamento con ID 1 es 'Sistemas'
             'password' => bcrypt('password'), // Establecer una contraseña segura
             'telefono' => '1234567890',
             'tipo_identificacion' => 'Cédula',

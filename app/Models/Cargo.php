@@ -29,5 +29,11 @@ class Cargo extends Model
         return $this->belongsTo(Usuario::class, 'updated_by');
     }
 
+    public function usuariosAsignados()
+    {
+        return $this->belongsToMany(Usuario::class, 'cargo_user', 'cargo_id', 'user_id')
+            ->withTimestamps();
+    }
+
 
 }

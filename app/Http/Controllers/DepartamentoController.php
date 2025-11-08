@@ -100,4 +100,87 @@ class DepartamentoController extends Controller
         $usuarios = Departamento::findOrFail($departamento_id)->usuarios;
         return response()->json(['message' => 'Usuarios del departamento obtenidos', 'data' => $usuarios], 200);
     }
+
+    /**
+     * Obtener todos los ancestros de un departamento.
+     * GET /api/departamentos/{id}/ancestros
+     */
+    public function obtenerAncestros($departamento_id)
+    {
+        $departamento = Departamento::findOrFail($departamento_id);
+        $ancestros = $departamento->obtenerAncestros();
+
+        return response()->json([
+            'message' => 'Ancestros del departamento obtenidos',
+            'departamento_id' => $departamento->id,
+            'data' => $ancestros,
+        ], 200);
+    }
+
+    /**
+     * Obtener la ruta completa de un departamento (para breadcrumbs).
+     * GET /api/departamentos/{id}/ruta
+     */
+    public function obtenerRuta($departamento_id)
+    {
+        $departamento = Departamento::findOrFail($departamento_id);
+        $ruta = $departamento->obtenerRuta();
+
+        return response()->json([
+            'message' => 'Ruta del departamento obtenida',
+            'departamento_id' => $departamento->id,
+            'data' => $ruta,
+        ], 200);
+    }
+
+    /**
+     * Obtener todos los descendientes de un departamento.
+     * GET /api/departamentos/{id}/descendientes
+     */
+    public function obtenerDescendientes($departamento_id)
+    {
+        $departamento = Departamento::findOrFail($departamento_id);
+        $descendientes = $departamento->obtenerDescendientes();
+
+        return response()->json([
+            'message' => 'Descendientes del departamento obtenidos',
+            'departamento_id' => $departamento->id,
+            'count' => $descendientes->count(),
+            'data' => $descendientes,
+        ], 200);
+    }
+
+    /**
+     * Verificar si un departamento es ancestro de otro.
+     * GET /api/departamentos/{id}/es-ancestro/{otro_id}
+     */
+    public function esAncestroDE($departamento_id, $otro_id)
+    {
+        $departamento = Departamento::findOrFail($departamento_id);
+        $otroDepartamento = Departamento::findOrFail($otro_id);
+        $esAncestro = $departamento->esAncestroDE($otroDepartamento);
+
+        return response()->json([
+            'message' => '¿Es ancestro?',
+            'departamento_id' => $departamento_id,
+            'otro_departamento_id' => $otro_id,
+            'es_ancestro' => $esAncestro,
+        ], 200);
+    }
+
+    /**
+     * Obtener el departamento raíz de la jerarquía.
+     * GET /api/departamentos/{id}/raiz
+     */
+    public function obtenerRaiz($departamento_id)
+    {
+        $departamento = Departamento::findOrFail($departamento_id);
+        $raiz = $departamento->obtenerRaiz();
+
+        return response()->json([
+            'message' => 'Departamento raíz obtenido',
+            'departamento_id' => $departamento->id,
+            'data' => $raiz,
+        ], 200);
+    }
 }

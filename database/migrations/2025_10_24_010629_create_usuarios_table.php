@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->string('nombres_completos');
-            $table->string('correo_electronico')->unique();
+            $table->string('nombres_completos')->nullable();
+            $table->string('correo_electronico')->nullable()->unique();
             $table->string('tipo_identificacion')->nullable();
             $table->string('identificacion')->nullable();
             $table->string('telefono')->nullable();
-            $table->string('password');
-            $table->boolean('activo')->default(true);
+            $table->string('password')->nullable();
+            $table->boolean('activo')->default(true)->nullable();
             $table->timestamps();
 
             // Relaciones con departamentos
-            $table->foreignId('cargo_id')->constrained('cargos')->onDelete('cascade');
-            $table->foreignId('departamento_id')->constrained('departamentos')->onDelete('cascade');
+            $table->foreignId('cargo_id')->nullable()->constrained('cargos')->onDelete('cascade');
+            $table->foreignId('departamento_id')->nullable()->constrained('departamentos')->onDelete('cascade');
         });
     }
 

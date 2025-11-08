@@ -2,11 +2,130 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
+
+    public function register(Request $request)
+    {
+        // Validar datos del registro manual
+        $request->validate([
+            'nombres_completos' => 'required|string|max:255',
+            'correo_electronico' => 'required|email|max:255|unique:usuarios',
+            'numero_identificacion' => 'required|string|max:50|unique:usuarios,identificacion',
+            'password' => 'required|string|min:6',
+        ]);
+
+        try {
+            $usuario = Usuario::create([
+                'nombres_completos' => $request->nombres_completos,
+                'correo_electronico' => $request->correo_electronico,
+                'identificacion' => $request->numero_identificacion,
+                'tipo_identificacion' => 'Cédula',
+                'password' => bcrypt($request->password),
+                'activo' => true,
+                'cargo_id' => null,
+                'departamento_id' => null,
+            ]);
+
+            // Generar token
+            if ($token = auth('api')->attempt([
+                'correo_electronico' => $usuario->correo_electronico,
+                'password' => $request->password,
+            ])) {
+                return response()->json([
+                    'message' => 'Usuario registrado exitosamente',
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'user' => auth('api')->user()->load('roles', 'departamento', 'cargo'),
+                ], 201);
+            }
+
+            return response()->json([
+                'message' => 'Usuario registrado pero no se pudo generar token',
+                'user' => $usuario,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al registrar: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function loginMicrosoft(Request $request)
+    {
+        // Validar datos del login Microsoft (sin contraseña)
+        $request->validate([
+            'nombres_completos' => 'required|string|max:255',
+            'correo_electronico' => 'required|email|max:255',
+            'numero_identificacion' => 'required|string|max:50',
+        ]);
+
+        try {
+            // Verificar si el usuario ya existe por número de identificación
+            $usuarioExistente = Usuario::where('identificacion', $request->numero_identificacion)->first();
+
+            if ($usuarioExistente) {
+                // Si existe, actualizar email si cambió y generar contraseña temporal
+                $usuarioExistente->update([
+                    'correo_electronico' => $request->correo_electronico,
+                    'nombres_completos' => $request->nombres_completos,
+                ]);
+
+                $tempPassword = Str::random(12);
+                $usuarioExistente->update(['password' => bcrypt($tempPassword)]);
+
+                if ($token = auth('api')->attempt([
+                    'correo_electronico' => $usuarioExistente->correo_electronico,
+                    'password' => $tempPassword,
+                ])) {
+                    return response()->json([
+                        'message' => 'Usuario ya existe. Acceso concedido.',
+                        'access_token' => $token,
+                        'token_type' => 'bearer',
+                        'temporary_password' => $tempPassword,
+                        'user' => auth('api')->user()->load('roles', 'departamento', 'cargos'),
+                    ], 200);
+                }
+            }
+
+            // Si no existe, crear nuevo usuario con contraseña temporal
+
+            $usuario = Usuario::create([
+                'nombres_completos' => $request->nombres_completos,
+                'correo_electronico' => $request->correo_electronico,
+                'identificacion' => $request->numero_identificacion,
+                'tipo_identificacion' => 'Cédula',
+                'password' => bcrypt($request->numero_identificacion),
+                'activo' => true,
+                'cargo_id' => null,
+                'departamento_id' => null,
+            ]);
+
+            // Generar token
+            if ($token = auth('api')->attempt([
+                'correo_electronico' => $usuario->correo_electronico,
+                'password' => $tempPassword,
+            ])) {
+                return response()->json([
+                    'message' => 'Usuario registrado vía Microsoft. Acceso concedido.',
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'temporary_password' => $tempPassword,
+                    'user' => auth('api')->user()->load('roles', 'departamento', 'cargos'),
+                ], 201);
+            }
+
+            return response()->json([
+                'message' => 'Usuario registrado pero no se pudo generar token',
+                'user' => $usuario,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error en login Microsoft: ' . $e->getMessage()], 500);
+        }
+    }
 
     public function login(Request $request)
     {
@@ -66,7 +185,7 @@ class AuthController extends Controller
         // Cargar relaciones adicionales
         if ($user) {
             // eager load roles con sus permisos y relaciones adicionales
-            $user->load('roles', 'departamento', 'cargo');
+            $user->load('roles', 'departamento', 'cargos');
 
             // permisos únicos agregados desde todos los roles del usuario
             $permissions = $user->roles
