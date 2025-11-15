@@ -12,8 +12,7 @@ class CategoriaEspacioController extends Controller
      */
     public function index()
     {
-        //
-        $categoriaEspacio = CategoriaEspacio::all();
+        $categoriaEspacio = CategoriaEspacio::with('espacios')->paginate(15);
         return response()->json(["message" => "Categorías de Espacios obtenidas con éxito", "data" => $categoriaEspacio]);
     }
 
@@ -45,7 +44,7 @@ class CategoriaEspacioController extends Controller
      */
     public function show($categoria_id)
     {
-        $categoriaEspacio = CategoriaEspacio::find($categoria_id);
+        $categoriaEspacio = CategoriaEspacio::with('espacios')->find($categoria_id);
         if (!$categoriaEspacio) {
             return response()->json(['message'=> 'Categoría de Espacio no encontrada'],404);
         }

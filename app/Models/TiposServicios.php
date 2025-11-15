@@ -10,10 +10,9 @@ class TiposServicios extends Model
     protected $table = "tipos_servicios";
     protected $fillable = ["nombre_tipo_servicio", "descripcion", "estado"];
 
-    public function serviciosInternos()
+    public function servicios()
     {
-        return $this->hasMany(ServicioInterno::class, 'tipo_servicio_id');
+        return $this->hasMany(Servicios::class, 'tipo_servicio_id');
     }
-
 
 }

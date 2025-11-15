@@ -5,19 +5,42 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class ServicioInterno extends Model
+class Horarios extends Model
 {
     //
-    protected $table = "servicio_internos";
+    protected $table = "horarios";
+    protected $fillable = [
+        'nombre_horario',
+        'descripcion',
+        'fecha_inicio',
+        'fecha_fin',
+        'hora_inicio',
+        'hora_fin',
+        'activo',
+    ];
 
-    protected $fillable = ["nombre_servicio","codigo_servicio", "activo", "created_at", "updated_at", "deleted_at"];
+    public function scopeActive($query)
+    {
+        return $query->where('activo', true);
+    }
+
+    public function tarifas()
+    {
+        return $this->hasMany(Tarifas::class, 'horario_id');
+    }
 
     public function espacios()
     {
-        return $this->belongsToMany(Espacio::class, "servicio_interno_espacios", "servicio_interno_id", "espacio_id");
+        return $this->belongsToMany(Espacio::class, 'horarios_espacios', 'horario_id', 'espacio_id');
     }
 
-    // Métodos auxiliares para gestionar espacios ligados a este servicio interno
+    public function espacio()
+    {
+        return $this->belongsToMany(Espacio::class, 'horarios_espacios', 'horario_id', 'espacio_id');
+    }
+
+    // Métodos auxiliares para gestionar espacios ligados a este horario
+
     public function assignEspacio($espacio)
     {
         if ($espacio instanceof Espacio) {

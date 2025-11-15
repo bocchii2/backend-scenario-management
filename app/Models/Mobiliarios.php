@@ -5,19 +5,37 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class ServicioInterno extends Model
+class Mobiliarios extends Model
 {
     //
-    protected $table = "servicio_internos";
+    protected $table = "mobiliarios";
 
-    protected $fillable = ["nombre_servicio","codigo_servicio", "activo", "created_at", "updated_at", "deleted_at"];
+    protected $fillable = [
+        "nombre_mobiliario",
+        "descripcion",
+        "detalles_tecnicos",
+        "activo",
+        "categoria_mobiliario_id",
+        "created_at",
+        "updated_at",
+        "deleted_at"
+    ];
+    protected $casts = [
+        'detalles_tecnicos' => 'json',
+    ];
+
+    public function categoriaMobiliario()
+    {
+        return $this->belongsTo(CategoriaMobiliarios::class, 'categoria_mobiliario_id');
+    }
 
     public function espacios()
     {
-        return $this->belongsToMany(Espacio::class, "servicio_interno_espacios", "servicio_interno_id", "espacio_id");
+        return $this->belongsToMany(Espacio::class, 'mobiliarios_espacios', 'mobiliario_id', 'espacio_id')
+                    ->withTimestamps();
     }
 
-    // Métodos auxiliares para gestionar espacios ligados a este servicio interno
+    // Métodos auxiliares para gestionar espacios ligados a este mobiliario
     public function assignEspacio($espacio)
     {
         if ($espacio instanceof Espacio) {
@@ -77,5 +95,4 @@ class ServicioInterno extends Model
     {
         return $this->espacios()->where('espacios.id', $espacioId)->exists();
     }
-
 }

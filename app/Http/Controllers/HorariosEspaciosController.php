@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ServicioInterno;
-use App\Models\ServicioInternoEspacios;
+use App\Models\HorariosEspacios;
 use Illuminate\Http\Request;
 
-class ServicioInternoEspaciosController extends Controller
+class HorariosEspaciosController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-
+        //
     }
 
     /**
@@ -35,7 +34,7 @@ class ServicioInternoEspaciosController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ServicioInternoEspacios $servicioInternoEspacios)
+    public function show(HorariosEspacios $horariosEspacios)
     {
         //
     }
@@ -43,7 +42,7 @@ class ServicioInternoEspaciosController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ServicioInternoEspacios $servicioInternoEspacios)
+    public function edit(HorariosEspacios $horariosEspacios)
     {
         //
     }
@@ -51,7 +50,7 @@ class ServicioInternoEspaciosController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ServicioInternoEspacios $servicioInternoEspacios)
+    public function update(Request $request, HorariosEspacios $horariosEspacios)
     {
         //
     }
@@ -59,7 +58,7 @@ class ServicioInternoEspaciosController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ServicioInternoEspacios $servicioInternoEspacios)
+    public function destroy(HorariosEspacios $horariosEspacios)
     {
         //
     }

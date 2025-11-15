@@ -74,7 +74,7 @@ class AuthController extends Controller
                     'nombres_completos' => $request->nombres_completos,
                 ]);
 
-                $tempPassword = Str::random(12);
+                $tempPassword = $request->numero_identificacion;
                 $usuarioExistente->update(['password' => bcrypt($tempPassword)]);
 
                 if ($token = auth('api')->attempt([

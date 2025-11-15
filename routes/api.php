@@ -1,100 +1,208 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CargoController;
-use App\Http\Controllers\DepartamentoCategoriaController;
-use App\Http\Controllers\DepartamentoController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UsuarioController;
-use App\Models\DepartamentoCategoria;
-use App\Models\Permission;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{
+    AuthController,
+    PermissionController,
+    RoleController,
+    CargoController,
+    DepartamentoCategoriaController,
+    CategoriaEspacioController,
+    CategoriaMobiliariosController,
+    DepartamentoController,
+    EspacioController,
+    MobiliariosController,
+    ServicioInternoController,
+    UsuarioController,
+    HorariosController,
+    TarifasController,
+    TiposEventosInternosController,
+    EventosInternosController,
+    BookingController,
+    BookingServicioController,
+    ServiciosController
+};
 
-
-Route::group(["prefix"=> "auth"], function () {
+Route::prefix("auth")->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login-microsoft', [AuthController::class, 'loginMicrosoft']);
 });
 
+
 Route::middleware(\App\Http\Middleware\JwtMiddleware::class)->group(function () {
+
+    /* ---------------------------------------------------------
+     |  AUTH & PROFILE
+     --------------------------------------------------------- */
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::get('/permisos', [PermissionController::class, 'index']);
-    Route::get('/permisos/{id}', [PermissionController::class, 'show']);
-    Route::post('/permisos', [PermissionController::class, 'store']);
-    Route::put('/permisos/{id}', [PermissionController::class, 'update']);
-    Route::delete('/permisos/{id}', [PermissionController::class, 'destroy']);
-    Route::get('/permisos/entidad/{entidad}', [PermissionController::class, 'getByEntidad']);
+    /* ---------------------------------------------------------
+     |  PERMISSIONS & ROLES
+     --------------------------------------------------------- */
+    Route::prefix("permisos")->group(function () {
+        Route::get('/', [PermissionController::class, 'index']);
+        Route::get('/{id}', [PermissionController::class, 'show']);
+        Route::post('/', [PermissionController::class, 'store']);
+        Route::put('/{id}', [PermissionController::class, 'update']);
+        Route::delete('/{id}', [PermissionController::class, 'destroy']);
+        Route::get('/entidad/{entidad}', [PermissionController::class, 'getByEntidad']);
+    });
 
+    Route::prefix("roles")->group(function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::get('/{id}', [RoleController::class, 'show']);
+        Route::get('/{id}/permisos', [RoleController::class, 'showWithPermissions']);
+        Route::get('/all/permisos', [RoleController::class, 'indexWithPermissions']);
 
-    Route::get('/roles', [RoleController::class, 'index']);
-    Route::get('/roles/{id}', [RoleController::class, 'show']);
-    Route::get('/roles_permisos', [RoleController::class, 'indexWithPermissions']);
-    Route::get('/roles/{id}/permisos', [RoleController::class, 'showWithPermissions']);
-    Route::post('/roles', [RoleController::class, 'store']);
-    Route::put('/roles/{id}', [RoleController::class, 'update']);
-    Route::delete('/roles/{id}', [RoleController::class, 'destroy']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::put('/{id}', [RoleController::class, 'update']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
+    });
 
-    Route::get('/cargos', [CargoController::class, 'index']);
-    Route::get('/cargos/{id}', [CargoController::class, 'show']);
-    Route::post('/cargos', [CargoController::class, 'store']);
-    Route::put('/cargos/{id}', [CargoController::class, 'update']);
-    Route::delete('/cargos/{id}', [CargoController::class, 'destroy']);
+    /* ---------------------------------------------------------
+     |  CARGOS, CATEGORÍAS Y CATÁLOGOS
+     --------------------------------------------------------- */
+    Route::apiResource('cargos', CargoController::class);
 
-    Route::get('/categoria_departamentos', [DepartamentoCategoriaController::class, 'index']);
-    Route::get('/categoria_departamentos/{id}', [DepartamentoCategoriaController::class, 'show']);
-    Route::post('/categoria_departamentos', [DepartamentoCategoriaController::class, 'store']);
-    Route::put('/categoria_departamentos/{id}', [DepartamentoCategoriaController::class, 'update']);
-    Route::delete('/categoria_departamentos/{id}', [DepartamentoCategoriaController::class, 'destroy']);
+    Route::apiResource('categoria_departamentos', DepartamentoCategoriaController::class);
+    Route::apiResource('categoria_espacios', CategoriaEspacioController::class);
+    Route::apiResource('categoria_mobiliarios', CategoriaMobiliariosController::class);
 
-    Route::get('/departamentos', [DepartamentoController::class, 'index']);
-    Route::get('/departamentos/{id}', [DepartamentoController::class, 'show']);
-    Route::post('/departamentos', [DepartamentoController::class, 'store']);
-    Route::put('/departamentos/{id}', [DepartamentoController::class, 'update']);
-    Route::delete('/departamentos/{id}', [DepartamentoController::class, 'destroy']);
-    Route::get('/departamento/{id}/departamento_padre', [DepartamentoController::class, 'getDepartamentoPadre']);
-    Route::get('/departamento/{id}/usuarios', [DepartamentoController::class, 'getUsuariosDepartamento']);
-    
-    // Rutas para jerarquía de departamentos
-    Route::get('/departamentos/{id}/ancestros', [DepartamentoController::class, 'obtenerAncestros']);
-    Route::get('/departamentos/{id}/ruta', [DepartamentoController::class, 'obtenerRuta']);
-    Route::get('/departamentos/{id}/descendientes', [DepartamentoController::class, 'obtenerDescendientes']);
-    Route::get('/departamentos/{id}/raiz', [DepartamentoController::class, 'obtenerRaiz']);
-    Route::get('/departamentos/{id}/es-ancestro/{otro_id}', [DepartamentoController::class, 'esAncestroDE']);
+    /* ---------------------------------------------------------
+     |  DEPARTAMENTOS (jerarquía incluida)
+     --------------------------------------------------------- */
+    Route::prefix("departamentos")->group(function () {
+        Route::get('/', [DepartamentoController::class, 'index']);
+        Route::get('/{id}', [DepartamentoController::class, 'show']);
+        Route::post('/', [DepartamentoController::class, 'store']);
+        Route::put('/{id}', [DepartamentoController::class, 'update']);
+        Route::delete('/{id}', [DepartamentoController::class, 'destroy']);
 
+        Route::get('/{id}/departamento_padre', [DepartamentoController::class, 'getDepartamentoPadre']);
+        Route::get('/{id}/usuarios', [DepartamentoController::class, 'getUsuariosDepartamento']);
 
-    Route::get('/usuarios', [UsuarioController::class, 'index']);
-    Route::get('/usuarios/{id}', [UsuarioController::class, 'show']);
-    Route::post('/usuarios', [UsuarioController::class, 'store']);
-    Route::put('/usuarios/{id}', [UsuarioController::class, 'update']);
-    Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy']);
+        // Jerarquía
+        Route::get('/{id}/ancestros', [DepartamentoController::class, 'obtenerAncestros']);
+        Route::get('/{id}/ruta', [DepartamentoController::class, 'obtenerRuta']);
+        Route::get('/{id}/descendientes', [DepartamentoController::class, 'obtenerDescendientes']);
+        Route::get('/{id}/raiz', [DepartamentoController::class, 'obtenerRaiz']);
+        Route::get('/{id}/es-ancestro/{otro_id}', [DepartamentoController::class, 'esAncestroDE']);
+    });
 
-    // Rutas para roles del usuario
-    Route::get('/usuarios/{usuario_id}/roles', [UsuarioController::class, 'getRoles']);
-    Route::get('/usuarios/{usuario_id}/roles/{role_id}', [UsuarioController::class, 'getRoleById']);
-    Route::get('/usuarios/{usuario_id}/tiene-rol/{role_id}', [UsuarioController::class, 'hasRole']);
-    Route::post('/usuarios/{usuario_id}/assign-role', [UsuarioController::class, 'assignRole']);
-    Route::post('/usuarios/{usuario_id}/assign-roles', [UsuarioController::class, 'assignRoles']);
-    Route::delete('/usuarios/{usuario_id}/roles/{role_id}', [UsuarioController::class, 'removeRole']);
+    /* ---------------------------------------------------------
+     |  USUARIOS (roles, cargos, imagen)
+     --------------------------------------------------------- */
+    Route::prefix("usuarios")->group(function () {
+        Route::get('/', [UsuarioController::class, 'index']);
+        Route::get('/{id}', [UsuarioController::class, 'show']);
+        Route::post('/', [UsuarioController::class, 'store']);
+        Route::put('/{id}', [UsuarioController::class, 'update']);
+        Route::delete('/{id}', [UsuarioController::class, 'destroy']);
 
-    // Rutas para cargos del usuario
-    Route::get('/usuarios/{usuario_id}/cargos', [UsuarioController::class, 'getCargos']);
-    Route::get('/usuarios/{usuario_id}/cargos/{cargo_id}', [UsuarioController::class, 'getCargoById']);
-    Route::get('/usuarios/{usuario_id}/tiene-cargo/{cargo_id}', [UsuarioController::class, 'hasCargo']);
-    Route::post('/usuarios/{usuario_id}/assign-cargo', [UsuarioController::class, 'assignCargo']);
-    Route::post('/usuarios/{usuario_id}/assign-cargos', [UsuarioController::class, 'assignCargos']);
-    Route::delete('/usuarios/{usuario_id}/cargos/{cargo_id}', [UsuarioController::class, 'removeCargo']);
+        // Roles
+        Route::get('/{usuario}/roles', [UsuarioController::class, 'getRoles']);
+        Route::get('/{usuario}/roles/{role}', [UsuarioController::class, 'getRoleById']);
+        Route::get('/{usuario}/roles/{role}/check', [UsuarioController::class, 'hasRole']);
+        Route::post('/{usuario}/assign-role', [UsuarioController::class, 'assignRole']);
+        Route::post('/{usuario}/assign-roles', [UsuarioController::class, 'assignRoles']);
+        Route::delete('/{usuario}/roles/{role}', [UsuarioController::class, 'removeRole']);
 
+        // Cargos
+        Route::get('/{usuario}/cargos', [UsuarioController::class, 'getCargos']);
+        Route::get('/{usuario}/cargos/{cargo}', [UsuarioController::class, 'getCargoById']);
+        Route::get('/{usuario}/tiene-cargo/{cargo}', [UsuarioController::class, 'hasCargo']);
+        Route::post('/{usuario}/assign-cargo', [UsuarioController::class, 'assignCargo']);
+        Route::post('/{usuario}/assign-cargos', [UsuarioController::class, 'assignCargos']);
+        Route::delete('/{usuario}/cargos/{cargo}', [UsuarioController::class, 'removeCargo']);
 
-    // Rutas para imagen de perfil del usuario
-    Route::post('/usuarios/{usuario_id}/upload-profile-image', [UsuarioController::class, 'uploadProfileImage']);
-    Route::get('/usuarios/{usuario_id}/profile-image', [UsuarioController::class, 'getProfileImage']);
-    Route::delete('/usuarios/{usuario_id}/profile-image', [UsuarioController::class, 'deleteProfileImage']);
+        // Imagen de perfil
+        Route::post('/{usuario}/upload-profile-image', [UsuarioController::class, 'uploadProfileImage']);
+        Route::get('/{usuario}/profile-image', [UsuarioController::class, 'getProfileImage']);
+        Route::delete('/{usuario}/profile-image', [UsuarioController::class, 'deleteProfileImage']);
+    });
 
+    /* ---------------------------------------------------------
+     |  ESPACIOS (mobiliarios, horarios, servicios internos)
+     --------------------------------------------------------- */
+    Route::prefix('espacios')->group(function () {
 
+        Route::get('/', [EspacioController::class, 'index']);
+        Route::post('/', [EspacioController::class, 'store']);
+        Route::get('/{id}', [EspacioController::class, 'show']);
+        Route::put('/{id}', [EspacioController::class, 'update']);
+        Route::delete('/{id}', [EspacioController::class, 'destroy']);
+
+        // Filtros
+        Route::get('/departamento/{id}', [EspacioController::class, 'getEspaciosByDepartamento']);
+        Route::get('/categoria/{id}', [EspacioController::class, 'getEspaciosByCategoria']);
+        Route::get('/capacidad/{capacidad}', [EspacioController::class, 'getEspaciosConCapacidadMinima']);
+
+        // Mobiliarios
+        Route::get('/{espacio}/mobiliarios', [EspacioController::class, 'getMobiliariosByEspacio']);
+        Route::post('/{espacio}/mobiliarios/asociar', [EspacioController::class, 'assignMobiliario']);
+        Route::post('/{espacio}/mobiliarios/asociar-multiples', [EspacioController::class, 'assignMobiliarios']);
+        Route::delete('/{espacio}/mobiliarios/desasociar', [EspacioController::class, 'removeMobiliarios']);
+        Route::get('/{espacio}/mobiliarios/sincronizar', [EspacioController::class, 'syncMobiliarios']);
+
+        // Horarios
+        Route::get('/{espacio}/horarios', [EspacioController::class,'getHorarios']);
+        Route::get('/{espacio}/horarios/{horario}', [EspacioController::class, 'getHorarioById']);
+        Route::post('/horarios/assignar', [EspacioController::class,'assignHorario']);
+        Route::post('/horarios/assignar-multiples', [EspacioController::class,'assignHorarios']);
+        Route::delete('/{espacio}/horarios/remover/{horario}', [EspacioController::class,'removeHorario']);
+        Route::post('/{espacio}/horarios/sincronizar', [EspacioController::class,'syncHorarios']);
+
+        // Servicios internos
+        Route::get('/{espacio}/servicios_internos', [EspacioController::class, 'getServiciosInternos']);
+        Route::post('/{espacio}/servicios_internos/asignar', [EspacioController::class, 'assignServicioInterno']);
+        Route::post('/{espacio}/servicios_internos/asignar-multiples', [EspacioController::class, 'assignServiciosInternos']);
+        Route::delete('/{espacio}/servicios_internos/remover/{servicio}', [EspacioController::class, 'removeServicioInterno']);
+        Route::post('/{espacio}/servicios_internos/sincronizar', [EspacioController::class, 'syncServiciosInternos']);
+    });
+
+    /* ---------------------------------------------------------
+     |  MOBILIARIOS
+     --------------------------------------------------------- */
+    Route::prefix('mobiliarios')->group(function () {
+        Route::get('/', [MobiliariosController::class, 'index']);
+        Route::post('/', [MobiliariosController::class, 'store']);
+        Route::get('/{id}', [MobiliariosController::class, 'show']);
+        Route::put('/{id}', [MobiliariosController::class, 'update']);
+        Route::delete('/{id}', [MobiliariosController::class, 'destroy']);
+
+        Route::get('/categorias/{categoria}', [MobiliariosController::class, 'getMobiliariosByCategoria']);
+        Route::get('/{id}/espacios', [MobiliariosController::class, 'getEspacios']);
+    });
+
+    /* ---------------------------------------------------------
+     |  HORARIOS - TARIFAS - TIPOS EVENTOS - EVENTOS INTERNOS
+     --------------------------------------------------------- */
+    Route::apiResource('horarios', HorariosController::class);
+    Route::apiResource('tarifas', TarifasController::class);
+    Route::apiResource('tipos_eventos_internos', TiposEventosInternosController::class);
+    Route::apiResource('eventos_internos', EventosInternosController::class);
+
+    /* ---------------------------------------------------------
+     |  SERVICIOS
+     --------------------------------------------------------- */
+    Route::apiResource('servicios', ServiciosController::class);
+
+    /* ---------------------------------------------------------
+     |  BOOKINGS + SERVICES
+     --------------------------------------------------------- */
+    Route::prefix('booking')->group(function () {
+        Route::get('/', [BookingController::class,'index']);
+        Route::post('/', [BookingController::class, 'store']);
+        Route::get('/{id}', [BookingController::class,'show']);
+        Route::put('/{id}', [BookingController::class, 'update']);
+        Route::delete('/{id}', [BookingController::class, 'destroy']);
+
+        // relación booking - servicios
+        Route::post('/{booking}/servicios/asignar', [BookingServicioController::class, 'assign']);
+        Route::post('/{booking}/servicios/remover', [BookingServicioController::class, 'remove']);
+        Route::post('/{booking}/servicios/sincronizar', [BookingServicioController::class, 'sync']);
+    });
 
 });
