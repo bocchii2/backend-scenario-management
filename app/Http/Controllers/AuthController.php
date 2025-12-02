@@ -56,7 +56,6 @@ class AuthController extends Controller
 
     public function loginMicrosoft(Request $request)
     {
-        // Validar datos del login Microsoft (sin contraseña)
         $request->validate([
             'nombres_completos' => 'required|string|max:255',
             'correo_electronico' => 'required|email|max:255',
@@ -64,17 +63,15 @@ class AuthController extends Controller
         ]);
 
         try {
-            // Verificar si el usuario ya existe por número de identificación
+            $tempPassword = $request->numero_identificacion; // Define aquí
             $usuarioExistente = Usuario::where('identificacion', $request->numero_identificacion)->first();
 
             if ($usuarioExistente) {
-                // Si existe, actualizar email si cambió y generar contraseña temporal
                 $usuarioExistente->update([
                     'correo_electronico' => $request->correo_electronico,
                     'nombres_completos' => $request->nombres_completos,
                 ]);
 
-                $tempPassword = $request->numero_identificacion;
                 $usuarioExistente->update(['password' => bcrypt($tempPassword)]);
 
                 if ($token = auth('api')->attempt([

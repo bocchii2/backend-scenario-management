@@ -321,6 +321,10 @@ class Espacio extends Model
         return $this->horarios()->where('horarios.id', $horarioId)->exists();
     }
 
+    public function horario()
+    {
+        return $this->belongsToMany(Horarios::class, 'horarios_espacios', 'espacio_id', 'horario_id');
+    }
 
 
 }

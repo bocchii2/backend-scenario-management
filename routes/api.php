@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoriaServiciosController;
+use App\Http\Controllers\TiposServiciosInternosController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     AuthController,
@@ -181,13 +183,19 @@ Route::middleware(\App\Http\Middleware\JwtMiddleware::class)->group(function () 
      --------------------------------------------------------- */
     Route::apiResource('horarios', HorariosController::class);
     Route::apiResource('tarifas', TarifasController::class);
+    
+    // Ruta para obtener tarifas por horario
+    Route::get('tarifas/horario/{horario_id}', [TarifasController::class, 'getByHorario']);
     Route::apiResource('tipos_eventos_internos', TiposEventosInternosController::class);
     Route::apiResource('eventos_internos', EventosInternosController::class);
+    Route::apiResource('tipos_servicios_internos', TiposServiciosInternosController::class);
+    Route::apiResource('servicios_internos', ServicioInternoController::class);
 
     /* ---------------------------------------------------------
-     |  SERVICIOS
+     |  SERVICIOS - CATEGORÍAS SERVICIOS
      --------------------------------------------------------- */
     Route::apiResource('servicios', ServiciosController::class);
+    Route::apiResource('categoria_servicios', CategoriaServiciosController::class);
 
     /* ---------------------------------------------------------
      |  BOOKINGS + SERVICES

@@ -78,4 +78,11 @@ class ServicioInterno extends Model
         return $this->espacios()->where('espacios.id', $espacioId)->exists();
     }
 
+    public function tipoServicioInterno()
+    {
+        return $this->belongsTo(TiposServiciosInternos::class, 'tipo_servicio_interno_id');
+    }
+
+
+
 }

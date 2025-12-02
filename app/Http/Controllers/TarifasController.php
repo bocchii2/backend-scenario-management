@@ -95,4 +95,12 @@ class TarifasController extends Controller
         $tarifa->delete();
         return response()->json(['message'=> 'Tarifa eliminada']);
     }
+
+    public function getByHorario($horario_id)
+    {
+        $tarifas = Tarifas::where('horario_id', $horario_id)->get();
+        return response()->json(['message' => 'Tarifas por horario', 'data' => $tarifas]);
+    }
+
+
 }

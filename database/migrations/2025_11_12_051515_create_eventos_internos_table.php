@@ -21,7 +21,6 @@ return new class extends Migration
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->foreignId('departamento_organizador_id')->constrained('departamentos')->onDelete('cascade'); // indica el departamento organizador
-            $table->foreignId('tipo_evento_interno_id')->constrained('tipos_eventos_internos')->onDelete('cascade');
             $table->string('contacto_principal')->nullable();
             $table->string('contacto_responsable')->nullable();
             $table->boolean('estado')->default(true);

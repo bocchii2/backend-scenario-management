@@ -15,7 +15,7 @@ class HorariosController extends Controller
     public function index()
     {
         //
-        $horarios = Horarios::all();
+        $horarios = Horarios::with('espacios')->get();
 
         return response()->json(['message' => 'Lista de horarios', 'data' => $horarios], 200);
     }
@@ -53,7 +53,7 @@ class HorariosController extends Controller
     public function show(Horarios $horarios, $id_horario)
     {
         //
-        $horario = Horarios::findOrFail( $id_horario );
+        $horario = Horarios::with('espacios', 'tarifas')->findOrFail( $id_horario );
         return response()->json(['message'=> 'horario encontrado', 'data' => $horario],200);
     }
 

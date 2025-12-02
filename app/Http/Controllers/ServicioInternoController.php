@@ -14,7 +14,7 @@ class ServicioInternoController extends Controller
     public function index()
     {
         //
-        $data = ServicioInterno::all();
+        $data = ServicioInterno::with(['tipoServicioInterno', 'espacios'])->get();
         return response()->json(['data' => $data, 'message' => 'Servicios internos obtenidos exitosamente'], 200);
         
     }
@@ -36,9 +36,18 @@ class ServicioInternoController extends Controller
         $request->validate([
             'nombre_servicio' => 'required|string|max:255',
             'codigo_servicio' => 'required|string|max:100|unique:servicio_internos,codigo_servicio',
+            'tipo_servicio_interno_id' => 'required|exists:tipos_servicios_internos,id',
             'activo' => 'required|boolean',
         ]);
-        $servicioInterno = ServicioInterno::create($request->all());
+
+        $servicioInterno = ServicioInterno::create([
+            'nombre_servicio' => $request->nombre_servicio,
+            'codigo_servicio' => $request->codigo_servicio,
+            'tipo_servicio_interno_id' => $request->tipo_servicio_interno_id,
+            'activo' => $request->activo,
+        ]);
+        
+        $servicioInterno->load('tipoServicioInterno', 'espacios');
         return response()->json(['message' => 'Servicio interno creado exitosamente', 'data' => $servicioInterno], 201);
     }
 
@@ -47,7 +56,7 @@ class ServicioInternoController extends Controller
      */
     public function show(ServicioInterno $servicioInterno, $id)
     {
-        $servicioInterno = ServicioInterno::find($id);
+        $servicioInterno = ServicioInterno::find($id)->load('tipoServicioInterno', 'espacios');
         if (!$servicioInterno) {
             return response()->json(['message' => 'Servicio interno no encontrado'], 404);
         }

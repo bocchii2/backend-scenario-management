@@ -13,7 +13,7 @@ class EspacioController extends Controller
      */
     public function index()
     {
-        return Espacio::with(['categoria', 'departamento', 'creador', 'actualizador'])->paginate(15);
+        return Espacio::with(['categoria', 'horario','departamento','serviciosInternos', 'creador', 'actualizador'])->paginate(15);
     }
 
     /**
@@ -40,6 +40,11 @@ class EspacioController extends Controller
             'atributos_capacidad' => 'nullable|array',
             'categoria_espacio_id' => 'required|exists:categoria_espacios,id',
             'departamento_id' => 'required|exists:departamentos,id',
+            'servicios_internos' => 'nullable|array',
+            'servicios_internos.*' => 'integer|exists:servicio_internos,id',
+            'horarios' => 'nullable|array',
+            'horarios.*' => 'integer|exists:horarios,id',
+            
         ]);
 
         // Agregar información de auditoría
@@ -47,6 +52,22 @@ class EspacioController extends Controller
         $data['updated_by'] = auth()->id();
 
         $espacio = Espacio::create($data);
+
+        if ($espacio) {
+            // Asignar servicios internos si se proporcionan
+            if (isset($data['servicios_internos'])) {
+                $espacio->assignServiciosInternos($data['servicios_internos']);
+            }
+        }
+
+        if ($espacio) {
+            // Asignar horarios si se proporcionan
+            if (isset($data['horarios'])) {
+                $espacio->assignHorarios($data['horarios']);
+            }
+        }
+
+
 
         return response()->json($espacio->load(['categoria', 'departamento', 'creador', 'actualizador']), 201);
     }

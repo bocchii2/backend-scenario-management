@@ -82,4 +82,8 @@ class Servicios extends Model
         return $this->bookings()->where('bookings.id', $bookingId)->exists();
     }
 
+    public function categoriaServicio()
+    {
+        return $this->belongsTo(CategoriaServicios::class, 'categoria_servicio_id');
+    }
 }
