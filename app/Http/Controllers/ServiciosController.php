@@ -55,7 +55,7 @@ class ServiciosController extends Controller
     public function show(Servicios $servicios, $servicios_id)
     {
        try {
-         $service = Servicios::find($servicios_id);
+         $service = Servicios::with('tipoServicio')->find($servicios_id);
         if (!$service) {
             return response()->json(['message' => 'Servicio no encontrado'], 404);
         }

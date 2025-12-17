@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\CategoriaServiciosController;
+use App\Http\Controllers\TiposServiciosController;
 use App\Http\Controllers\TiposServiciosInternosController;
+use App\Models\TiposServicios;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     AuthController,
@@ -195,7 +197,7 @@ Route::middleware(\App\Http\Middleware\JwtMiddleware::class)->group(function () 
      |  SERVICIOS - CATEGORÍAS SERVICIOS
      --------------------------------------------------------- */
     Route::apiResource('servicios', ServiciosController::class);
-    Route::apiResource('categoria_servicios', CategoriaServiciosController::class);
+    Route::apiResource('categoria_servicios', TiposServiciosController::class);
 
     /* ---------------------------------------------------------
      |  BOOKINGS + SERVICES

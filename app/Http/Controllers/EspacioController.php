@@ -75,13 +75,13 @@ class EspacioController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Espacio $espacio, $id)
+    public function show($id)
     {
         $espacio = Espacio::find($id);
         if (!$espacio) {
             return response()->json(["message" => "Espacio no encontrado"], 404);
         }
-        return $espacio->load(['categoria', 'departamento', 'creador', 'actualizador', 'serviciosInternos']);
+        return response()->json(["data" => $espacio->load(['categoria', 'departamento', 'creador', 'actualizador', 'serviciosInternos', 'horarios'])], 200);
     }
 
     /**
